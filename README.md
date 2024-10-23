@@ -1,4 +1,4 @@
-PDF audio Parser V1 🎧
+PDF to Audio Parser 🎧
 
 This is a simple script that converts pdf to mp3 audio using Google's text to voice API.
 This current verison has a limit about an hour of audio per request due to Google's API limit.
