@@ -9,6 +9,4 @@ You must be online for this current verison to work.
 
 - Run this command in your terminal: python app.py "Your filename.pdf"
 
-- If there is a space in your filename, use quotes around it in the command.
-
 - The output audio file will appear in the working directory!

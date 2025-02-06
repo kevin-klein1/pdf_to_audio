@@ -61,9 +61,15 @@ except FileNotFoundError:
 # Convert the extracted text into an MP3 file. Message if request fails.
 try:
    text_to_speech(text, output_mp3)
-except Exception:
-   print("ERROR: Something went wrong. Please make sure you are connected to wifi.")
+except Exception as error:
+
+   ## Print message if error is gTTS error.
+   if type(error).__name__ == "gTTSError":
+      print(f"No more translation credits allowed for today. Please try again later.")
+      exit()
+
+   print(f"ERROR: Something went wrong. Please make sure you are connected to wifi. {type(error).__name__}")
    exit()
 
 
-print("Done!")
+print(f"Done! Successful conversion of {output_mp3}")
