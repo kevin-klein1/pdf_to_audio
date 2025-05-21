@@ -1,74 +1,113 @@
 import pdfplumber
 import subprocess
-from sys import argv
-from sys import exit
+import tempfile
+from gtts import gTTS
+import os
+import argparse
+import sys
 
 
+# Argument Parsing
 
+parser = argparse.ArgumentParser(description="Convert PDF to audio.")
+parser.add_argument("pdf_file", help="Path to the PDF file")
+parser.add_argument("--offline", action="store_true", help="Use offline TTS instead of gTTS")
+args = parser.parse_args()
 
-# Check for no args in terminal
-if len(argv) == 1:
-   print("Please enter a file name.")
-   exit()
-# Check for too many args in terminal
-if len(argv) != 2:
-   print("Please Enter only one file arguement.")
-   exit()
+# Function defs
 
-
-## Function defs
-# Function to extract text from a PDF using pdfplumber
+# PDF Text Extraction
 def extract_text_from_pdf(pdf_path):
-   with pdfplumber.open(pdf_path) as pdf:
-       full_text = ""
-       for page in pdf.pages:
-           page_text = page.extract_text()
-           full_text += page_text if page_text else ""
-   return full_text
+    with pdfplumber.open(pdf_path) as pdf:
+        full_text = ""
+        for page in pdf.pages:
+            page_text = page.extract_text()
+            full_text += page_text if page_text else ""
+    return full_text
 
 
-# Convert text to speech
-def text_to_speech(text):
-   print("Attempting to speak the PDF content...")
-   try:
-       subprocess.run(['say', text], check=True)
-       print("Content spoken successfully.")
-   except subprocess.CalledProcessError as e:
-       print(f"Error speaking content: {e}")
-       # Optionally, re-raise or handle more gracefully
-   except FileNotFoundError:
-       print("Error: The 'say' command was not found. Ensure you are on macOS and it's installed.")
-       # Optionally, re-raise or handle more gracefully
+# Online Text-to-Speech (gTTS)
+def text_to_speech_online(text, output_mp3):
+    print("🌐 Converting PDF to audio using gTTS (online mode)...")
+    tts = gTTS(text=text, lang='en')
+    tts.save(output_mp3)
+    print(f"✅ Done! Audio saved as: {output_mp3}")
+
+
+# Offline Text-to-Speech (macOS say + ffmpeg)
+def text_to_speech_offline(text, output_wav):
+    print("🔊 Converting PDF to audio using offline mode...")
+
+    chunk_size = 1500
+    chunks = [text[i:i + chunk_size].strip().replace('"', '') for i in range(0, len(text), chunk_size) if text[i:i + chunk_size].strip()]
+    aiff_files = []
+
+    for chunk in chunks:
+        with tempfile.NamedTemporaryFile(delete=False, mode="w", suffix=".txt") as tf:
+            tf.write(chunk)
+            tf.flush()
+
+            temp_aiff = tempfile.NamedTemporaryFile(delete=False, suffix=".aiff")
+            temp_aiff.close()
+
+            subprocess.run(["say", "-v", "Samantha", "-o", temp_aiff.name, "-f", tf.name], check=True)
+            aiff_files.append(temp_aiff.name)
+            os.remove(tf.name)
+
+    concat_file = tempfile.NamedTemporaryFile(delete=False, mode="w", suffix=".txt")
+    for path in aiff_files:
+        concat_file.write(f"file '{path}'\n")
+    concat_file.close()
+
+    combined_aiff = tempfile.NamedTemporaryFile(delete=False, suffix=".aiff")
+    combined_aiff.close()
+
+    subprocess.run([
+        "ffmpeg", "-y", "-f", "concat", "-safe", "0",
+        "-i", concat_file.name,
+        "-c", "copy", combined_aiff.name
+    ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+
+    subprocess.run(["ffmpeg", "-y", "-i", combined_aiff.name, output_wav],
+                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+
+    os.remove(concat_file.name)
+    os.remove(combined_aiff.name)
+    for path in aiff_files:
+        os.remove(path)
+
+    print(f"✅ Done! Full audio saved as: {output_wav}")
 
 
 
 
 
+# Main 
+def main():
+    pdf_path = args.pdf_file
 
-# Main workflow
-pdf_path = argv[1]  # PDF file path
+    if not pdf_path.lower().endswith(".pdf"):
+        print("❌ Please provide a file with .pdf extension.")
+        sys.exit(1)
 
+    try:
+        text = extract_text_from_pdf(pdf_path)
+    except FileNotFoundError:
+        print("❌ File not found. Please check the filename and path.")
+        sys.exit(1)
 
-# Check if file is of type 'pdf'
-if not pdf_path.lower().endswith(".pdf"):
-   print("Please enter file of type 'pdf'.")
-   exit()
+    output_file = os.path.splitext(pdf_path)[0] + (".wav" if args.offline else ".mp3")
 
+    try:
+        if args.offline:
+            print("Using OFFLINE")
+            text_to_speech_offline(text, output_file)
+        else:
+            print("Using ONLINE")
+            text_to_speech_online(text, output_file)
+    except Exception as e:
+        print(f"❌ ERROR: {type(e).__name__} — something went wrong during audio conversion.")
+        sys.exit(1)
 
-# Extract text from the PDF
-try:
-   text = extract_text_from_pdf(pdf_path)
-except FileNotFoundError:
-   print("File not found. Please check file name.")
-   exit()
-
-
-# Convert the extracted text into an MP3 file. Message if request fails.
-try:
-   text_to_speech(text)
-except Exception as error:
-   print(f"ERROR: Something went wrong. Please make sure you are connected to wifi. {type(error).__name__}")
-   exit()
-
-
-print("Done! Content has been spoken.")
+if __name__ == "__main__":
+    main()
