@@ -1,5 +1,5 @@
 import pdfplumber
-from gtts import gTTS
+import subprocess
 from sys import argv
 from sys import exit
 
@@ -27,11 +27,18 @@ def extract_text_from_pdf(pdf_path):
    return full_text
 
 
-# Convert text to speech and save as MP3
-def text_to_speech(text, output_mp3):
-   tts = gTTS(text=text, lang='en')
-   print("Attempting to Convert PDF to audio...")
-   tts.save(output_mp3)
+# Convert text to speech
+def text_to_speech(text):
+   print("Attempting to speak the PDF content...")
+   try:
+       subprocess.run(['say', text], check=True)
+       print("Content spoken successfully.")
+   except subprocess.CalledProcessError as e:
+       print(f"Error speaking content: {e}")
+       # Optionally, re-raise or handle more gracefully
+   except FileNotFoundError:
+       print("Error: The 'say' command was not found. Ensure you are on macOS and it's installed.")
+       # Optionally, re-raise or handle more gracefully
 
 
 
@@ -40,8 +47,6 @@ def text_to_speech(text, output_mp3):
 
 # Main workflow
 pdf_path = argv[1]  # PDF file path
-mp3_name = argv[1].strip(".pdf") # name reformated for mp3 output
-output_mp3 = f"{mp3_name}.mp3" #
 
 
 # Check if file is of type 'pdf'
@@ -60,16 +65,10 @@ except FileNotFoundError:
 
 # Convert the extracted text into an MP3 file. Message if request fails.
 try:
-   text_to_speech(text, output_mp3)
+   text_to_speech(text)
 except Exception as error:
-
-   ## Print message if error is gTTS error.
-   if type(error).__name__ == "gTTSError":
-      print(f"No more translation credits allowed for today. Please try again later.")
-      exit()
-
    print(f"ERROR: Something went wrong. Please make sure you are connected to wifi. {type(error).__name__}")
    exit()
 
 
-print(f"Done! Successful conversion of {output_mp3}")
+print("Done! Content has been spoken.")
