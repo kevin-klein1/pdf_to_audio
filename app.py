@@ -16,9 +16,8 @@ parser.add_argument("--offline", action="store_true", help="Use offline TTS inst
 args = parser.parse_args()
 
 
-# =======================
 # Function defs
-# =======================
+
 
 # PDF Text Extraction
 def extract_text_from_pdf(pdf_path):
