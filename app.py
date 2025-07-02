@@ -7,12 +7,20 @@ import shutil
 from gtts import gTTS
 import pdfplumber
 
+APPROVED_LANGUAGES = ["english", "spanish", "french", "portuguese"]
+
 
 # Argument Parsing setup using argparse
 
 parser = argparse.ArgumentParser(description="Convert PDF to audio.")
+
 parser.add_argument("pdf_file", help="Path to the PDF file")
 parser.add_argument("--offline", action="store_true", help="Use offline TTS instead of gTTS")
+parser.add_argument("-l", "--language", 
+                    choices=APPROVED_LANGUAGES, 
+                    type=lambda x: x.lower(), 
+                    default="english", 
+                    help="Language for text-to-speech")
 args = parser.parse_args()
 
 
@@ -34,18 +42,28 @@ def extract_text_from_pdf(pdf_path):
 
 
 # Online Text-to-Speech (gTTS)
-def text_to_speech_online(text, output_mp3):
+def text_to_speech_online(text, lang, output_mp3):
     print("Converting PDF to audio using gTTS using online mode (This may take a bit)...")
 
+    gtts_dict = {"english": "en", 
+                 "spanish": "es", 
+                 "portuguese": "pt", 
+                 "french": "fr"}
+
     # Call Google tts API on text and save audio to output param
-    tts = gTTS(text=text, lang='en')
+    tts = gTTS(text=text, lang=gtts_dict[lang])
     tts.save(output_mp3)
     print(f"Done! Audio saved as: {os.path.join(os.getcwd(), output_mp3)}")
 
 
 # Offline Text-to-Speech (macOS say + ffmpeg)
-def text_to_speech_offline(text, output_mp3):
+def text_to_speech_offline(text, lang, output_mp3):
     print("Converting PDF to audio using offline mode...")
+
+    say_dict = {"english": "Samantha", 
+                 "spanish": "Paulina", 
+                 "portuguese": "Luciana", 
+                 "french": "Améliea"}
 
     # Create chunks for apple 'say' to read 
     chunk_size = 1500
@@ -74,7 +92,7 @@ def text_to_speech_offline(text, output_mp3):
             temp_aiff.close()
 
             # Main process - run 'say' and save audio output to temporary aiff file, read from temp text file.
-            subprocess.run(["say", "-v", "Samantha", "-o", temp_aiff.name, "-f", tf.name], check=True)
+            subprocess.run(["say", "-v", say_dict[lang], "-o", temp_aiff.name, "-f", tf.name], check=True)
 
             # Append that aiff audio path to aiff_files list
             aiff_files.append(temp_aiff.name)
@@ -137,6 +155,8 @@ def main():
 
     # PDF file path    
     pdf_path = args.pdf_file
+    language = args.language
+    print(language)
  
 
     # Check if extension is .pdf
@@ -159,16 +179,14 @@ def main():
     # Get the output file name by replacing the .pdf extension with .mp3
     output_file = os.path.splitext(pdf_path)[0].replace("pdfs/", "") + ".mp3"
 
-    print(output_file)
-
     # Try to convert text to audio using either online or offline method
     try:
         if args.offline:
             print("Using OFFLINE")
-            text_to_speech_offline(text, output_file)
+            text_to_speech_offline(text, language, output_file)
         else:
             print("Using ONLINE")
-            text_to_speech_online(text, output_file)
+            text_to_speech_online(text,language, output_file)
     except Exception as e:
         print(f"ERROR: {type(e).__name__} — something went wrong during audio conversion. Please try again or try offline version (--offline).")
         sys.exit(1)
