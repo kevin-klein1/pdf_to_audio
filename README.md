@@ -52,19 +52,20 @@ sudo apt install ffmpeg
 ```
 
 
-5. **Add your PDF file** — Place the `.pdf` you want to convert into the root of the project directory
+5. **Add your PDF file** — Place the `.pdf` you want to convert into the `pdfs/` folder
 
 
 ---
 
 ## Usage
 
+
 ### Online Mode (default, uses gTTS):
 
 ```bash
 python app.py "pdfs/your_file.pdf"
 ```
-- Place your PDF files in the pdfs/ folder before running the command above
+
 - Requires internet  
 - Cross Platform (Windows, macOS, etc)
 - Better voice to text but limited usage
@@ -74,7 +75,7 @@ python app.py "pdfs/your_file.pdf"
 ### Offline Mode (macOS only, uses `say` + `ffmpeg`):
 
 ```bash
-python app.py "your_file.pdf" --offline
+python app.py "pdfs/your_file.pdf" --offline
 ```
 
 - No internet required  

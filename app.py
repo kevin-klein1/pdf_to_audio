@@ -27,6 +27,9 @@ def extract_text_from_pdf(pdf_path):
         for page in pdf.pages:
             page_text = page.extract_text()
             full_text += page_text if page_text else ""
+
+            ## close if memory processing gets too big, e.g large pdf 
+            page.close()
     return full_text
 
 
@@ -110,6 +113,19 @@ def text_to_speech_offline(text, output_mp3):
     print(f"Done! Full audio saved as: {os.path.join(os.getcwd(), output_mp3)}")
 
 
+
+def error_message_no_text():
+        print()
+        print()
+        print("PDF appears to contain no readable text. Please enter PDF with reable text.")
+        print()
+        print("Note: If your PDF does contain text, it is possible that it is an image-based PDF.")
+        print("PDF-to-Audio can only parse true PDF text files. Here are some solutions:")
+        print("• Use Adobe Acrobat's 'Make Text Searchable'")
+        print("• Convert at: smallpdf.com/pdf-to-text") 
+        print("• Upload to Google Drive (auto-OCR)")
+        print()
+
 # =======================
 # Main 
 # =======================
@@ -137,7 +153,7 @@ def main():
 
     # Case where PDF has no text, exit program
     if not text.strip():
-        print("PDF appears to contain no readable text. Please enter PDF with text.")
+        error_message_no_text()
         sys.exit(1)
 
     # Get the output file name by replacing the .pdf extension with .mp3
