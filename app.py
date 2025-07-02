@@ -17,7 +17,6 @@ args = parser.parse_args()
 
 
 
-
 # Function defs
 
 # PDF Text Extraction
@@ -122,7 +121,7 @@ def main():
 
     # PDF file path    
     pdf_path = args.pdf_file
-    
+ 
 
     # Check if extension is .pdf
     if not pdf_path.lower().endswith(".pdf"):

@@ -2,4 +2,9 @@
 .DS_Store
 test.pdf
 todo.txt
+debug_pdf.py
 assets/
+
+# Keep pdfs folder but ignore ALL contents inside it
+pdfs/*
+!pdfs/.gitkeep

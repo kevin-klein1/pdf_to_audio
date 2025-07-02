@@ -62,9 +62,9 @@ sudo apt install ffmpeg
 ### Online Mode (default, uses gTTS):
 
 ```bash
-python app.py "your_file.pdf"
+python app.py "pdfs/your_file.pdf"
 ```
-
+- Place your PDF files in the pdfs/ folder before running the command above
 - Requires internet  
 - Cross Platform (Windows, macOS, etc)
 - Better voice to text but limited usage
