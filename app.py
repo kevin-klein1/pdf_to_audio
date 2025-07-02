@@ -141,7 +141,9 @@ def main():
         sys.exit(1)
 
     # Get the output file name by replacing the .pdf extension with .mp3
-    output_file = os.path.splitext(pdf_path)[0] + ".mp3"
+    output_file = os.path.splitext(pdf_path)[0].replace("pdfs/", "") + ".mp3"
+
+    print(output_file)
 
     # Try to convert text to audio using either online or offline method
     try:
