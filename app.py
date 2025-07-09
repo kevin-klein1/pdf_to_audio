@@ -63,7 +63,7 @@ def text_to_speech_offline(text, lang, output_mp3):
     say_dict = {"english": "Samantha", 
                  "spanish": "Paulina", 
                  "portuguese": "Luciana", 
-                 "french": "Améliea"}
+                 "french": "Amélie"}
 
     # Create chunks for apple 'say' to read 
     chunk_size = 1500
@@ -156,7 +156,6 @@ def main():
     # PDF file path    
     pdf_path = args.pdf_file
     language = args.language
-    print(language)
  
 
     # Check if extension is .pdf
