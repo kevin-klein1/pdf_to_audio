@@ -82,7 +82,7 @@ python app.py "pdfs/your_file.pdf" --offline
 - macOS required with 'say' command pre-installed
 - Unlimited Usage
 
-### Multi Language Support (optional):
+### Multi-Language Support (optional):
 
 ```bash
 python app.py "pdfs/your_file.pdf" -l french
