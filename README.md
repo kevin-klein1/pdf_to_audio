@@ -82,6 +82,18 @@ python app.py "pdfs/your_file.pdf" --offline
 - macOS required with 'say' command pre-installed
 - Unlimited Usage
 
+### Multi Language Support (optional):
+
+```bash
+python app.py "pdfs/your_file.pdf" -l french
+```
+
+
+- **Supported languages:** English, French, Spanish, Portuguese
+- Use the -l or --language flag to specify a language (e.g., -l french)
+- Works in both online and offline mode
+- If no language is specified, English is used by default
+
 
 ---
 
